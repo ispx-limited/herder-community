@@ -17,7 +17,10 @@ if [ ! -f .env ]; then
         sed -i "s/^${var}=$/${var}=$(rand)/" .env
     done
     chmod 600 .env
-    echo "wrote .env with generated secrets; review ACS_HOST and HERDER_HOSTNAME"
+    echo "wrote .env with generated secrets."
+    echo "set ACS_HOST to the address CPEs will dial, review HERDER_HOSTNAME"
+    echo "and the ports, then run ./up.sh again."
+    exit 0
 fi
 
 set -a
