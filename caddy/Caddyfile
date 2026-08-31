@@ -1,0 +1,31 @@
+{
+	admin off
+	auto_https disable_redirects
+}
+
+# Plain HTTP serves nothing but liveness: the API sets a Secure cookie.
+:80 {
+	handle /healthz {
+		respond "ok" 200
+	}
+	handle {
+		redir https://{host}{uri} 308
+	}
+}
+
+{$HERDER_HOSTNAME:localhost} {
+	tls internal
+	handle /healthz {
+		respond "ok" 200
+	}
+	handle /api/v1/* {
+		reverse_proxy herderapi:8000
+	}
+	@apidocs path /api/openapi.json /api/openapi.yaml /api/docs /api/redoc
+	handle @apidocs {
+		reverse_proxy herderapi:8000
+	}
+	handle {
+		reverse_proxy frontend:3000
+	}
+}

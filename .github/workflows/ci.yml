@@ -1,0 +1,20 @@
+name: ci
+
+on:
+  pull_request:
+
+permissions: {}
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compose file is valid
+        # The empty secret vars in .env.example are required by the
+        # compose file on purpose; fill them so interpolation passes.
+        run: |
+          cp .env.example .env
+          sed -i 's/=$/=x/' .env
+          docker compose config -q
