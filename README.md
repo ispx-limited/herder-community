@@ -1,78 +1,98 @@
+<p align="center">
+  <img src="assets/herder.png" width="340" alt="Herder">
+</p>
+
 # Herder Community Edition
 
-Herder is an ACS for TR-069 and TR-369 (USP) fleets: it configures
-CPEs, streams their telemetry, and gives operators a GitOps workflow
-over both. This repository runs the Community Edition with Docker
-Compose: the full product, limited to 10 CPEs, for evaluation and lab
-use.
+A complete ACS on one machine. Herder manages TR-069 and TR-369 (USP)
+fleets: zero-touch provisioning, firmware campaigns, streaming
+telemetry, per-subscriber WiFi insight, and a GitOps workflow over
+device configuration. The Community Edition is the full product, free
+to run, limited to 10 CPEs.
 
-The container images are proprietary; EULA.md carries the terms that
-govern them. The files in this repository are Apache-2.0.
-
-Documentation lives at https://docs.herder.ispx.co/.
-
-## Requirements
-
-- Docker Engine with the compose plugin.
-- About 4 GB of RAM for the stack.
-- A host the CPEs can reach. The stack publishes 80 and 443 (console
-  and API), 7547 (TR-069), 7549 (firmware delivery) and 1883 (TR-369
-  over MQTT) on all interfaces; put a lab host behind a firewall you
-  trust.
+If you have Docker and a lab CPE, you are about ten minutes from a
+managed device.
 
 ## Quickstart
 
-```
+```sh
 git clone https://github.com/ispx-limited/herder-community
 cd herder-community
 ./up.sh
 ```
 
-The first run writes `.env` with generated secrets. Edit it, set
-`ACS_HOST` to the address CPEs will dial, and run `./up.sh` again.
-Then create the administrator; the password is printed once:
+The first run writes `.env` with generated secrets and stops. Set
+`ACS_HOST` to the address your CPEs will dial, the host's LAN IP or
+DNS name, then:
 
-```
+```sh
+./up.sh
 docker compose exec herderapi /app/community_entry.bin provision --admin
 ```
 
-The console is at https://localhost (or `HERDER_HOSTNAME` if set).
-The certificate comes from Caddy's internal CA, so the browser warns
-once.
+The administrator password is printed once. Sign in at
+https://localhost; the certificate comes from Caddy's internal CA, so
+the browser warns the first time.
 
-## Pointing CPEs at it
+## Connect a CPE
 
-- TR-069: `http://ACS_HOST:7547/`, with the factory credentials
-  written to `config/cwmp-factory.yaml`.
-- TR-369: MQTT on `ACS_HOST:1883`.
+- TR-069: point the CPE at `http://<ACS_HOST>:7547/` with the factory
+  credentials written to `config/cwmp-factory.yaml`.
+- TR-369: MQTT on `<ACS_HOST>:1883`.
+
+The [Community Edition guide](https://docs.herder.ispx.co/guides/community-edition/)
+walks from first sign-in to a connected, provisioned device. The rest
+of the documentation lives at [docs.herder.ispx.co](https://docs.herder.ispx.co/).
+
+## What you get
+
+One host, ten containers:
+
+| Piece | What it does |
+| --- | --- |
+| herder | The whole ACS in one process: the CWMP and USP adapters, provisioning, telemetry, firmware delivery, experience scores, jobs, webhooks |
+| herder-api, frontend | The northbound API and the console, behind Caddy |
+| postgres, pgbouncer | Device inventory and state |
+| clickhouse | Telemetry history |
+| nats | The message bus and the USP MQTT listener |
+| redis | Sessions and caching |
+
+Requirements: Docker Engine with the compose plugin and about 4 GB of
+RAM.
+
+## The 10 CPE limit
+
+The Community Edition admits 10 CPEs. Known devices keep working; the
+next device beyond the limit is refused at registration, over either
+protocol, and the refusal is logged. The limit is compiled into the
+binaries, not read from configuration. A larger fleet is a licensed
+deployment.
 
 ## Upgrading
 
-Change `HERDER_VERSION` in `.env` and run `./up.sh` again; it runs
-migrations before starting the stack.
+Set `HERDER_VERSION` in `.env` to the new release and run `./up.sh`
+again; migrations run before the new images start. Releases are listed
+in the [changelog](https://docs.herder.ispx.co/changelog/).
 
-## The device limit
+## Good to know
 
-The Community Edition admits at most 10 CPEs. The next device is
-refused at registration and the refusal is logged. The limit is part
-of the binaries, not of this configuration.
+- The published ports (80, 443, 7547, 7549, 1883) bind on all
+  interfaces. A lab host belongs behind a firewall you trust.
+- `keys/default` seals every credential Herder stores. Back it up
+  with the database; losing it orphans them.
+- Containers run as uid 1000 and read the generated files under
+  `keys/`, `secrets/` and `nkeys/`. A different host uid needs a
+  chown after generation.
+- This is the evaluation shape: one host, no HA, no split stores, no
+  inter-host TLS, no backups.
 
-## What this is not
+## Getting help
 
-- Not open source. This repository is Apache-2.0; the product in the
-  images is closed and obfuscated.
-- Not a production shape. One host, no TLS between services, no host
-  firewalling, no backups, no platform metrics store. Production
-  Herder is delivered and operated differently; start at
-  https://docs.herder.ispx.co/.
-- Not supported under an SLA. Issues here are read and answered on a
-  best effort basis.
+Issues and questions are welcome here and answered on a best effort
+basis; there is no SLA. The documentation is the fastest path for
+most questions.
 
-## Notes
+## License
 
-- The stack runs as uid 1000 inside the containers and reads the
-  generated files under `keys/`, `secrets/` and `nkeys/`. If your
-  user is not uid 1000, chown those files after `./up.sh` generates
-  them.
-- `keys/default` seals stored credentials. Losing it orphans them;
-  back it up with the database.
+The files in this repository are Apache-2.0. The container images
+hold Herder itself, which is proprietary; EULA.md carries its terms.
