@@ -4,7 +4,7 @@
     <img src="assets/herder-lockup-light.svg" height="64" alt="ispx herder">
   </picture>
   <br><br>
-  <a href="https://dsc.gg/ispx"><img src="https://img.shields.io/badge/Discord-join%20the%20ispx%20server-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
+  <a href="https://discord.gg/grSq5zZRH"><img src="https://img.shields.io/badge/Discord-join%20the%20ispx%20server-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
 </div>
 
 # Herder Community Edition
