@@ -2,6 +2,10 @@
   <img src="assets/herder.png" width="340" alt="Herder">
 </p>
 
+<p align="center">
+  <a href="https://dsc.gg/ispx"><img src="https://img.shields.io/badge/Discord-join%20the%20ispx%20server-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
+</p>
+
 # Herder Community Edition
 
 A complete ACS on one machine. Herder manages TR-069 and TR-369 (USP)
@@ -90,7 +94,8 @@ in the [changelog](https://docs.herder.ispx.co/changelog/).
 
 Issues and questions are welcome here and answered on a best effort
 basis; there is no SLA. The documentation is the fastest path for
-most questions.
+most questions, and the [ispx Discord](https://dsc.gg/ispx) is where
+the conversation happens.
 
 ## License
 
