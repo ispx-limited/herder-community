@@ -95,7 +95,7 @@ in the [changelog](https://docs.herder.ispx.co/changelog/).
 
 Issues and questions are welcome here and answered on a best effort
 basis; there is no SLA. The documentation is the fastest path for
-most questions, and the [ispx Discord](https://dsc.gg/ispx) is where
+most questions, and the [ispx Discord](https://discord.gg/grSq5zZRH) is where
 the conversation happens.
 
 ## License
