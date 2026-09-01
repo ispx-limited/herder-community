@@ -7,7 +7,10 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-rand() { openssl rand -hex 24; }
+# The letter prefix is load-bearing: NATS parses substituted env
+# values as config tokens, and a value that starts with a digit and
+# continues with letters is a parse error that keeps NATS restarting.
+rand() { printf 'p%s' "$(openssl rand -hex 24)"; }
 
 if [ ! -f .env ]; then
     cp .env.example .env
