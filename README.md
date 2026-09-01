@@ -1,11 +1,7 @@
 <p align="center">
-  <img src="assets/herder.png" width="340" alt="Herder">
-</p>
-
-<p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/herder-lockup-dark.svg">
-    <img src="assets/herder-lockup-light.svg" height="44" alt="ispx herder">
+    <img src="assets/herder-lockup-light.svg" height="64" alt="ispx herder">
   </picture>
 </p>
 
