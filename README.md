@@ -1,13 +1,11 @@
-<p align="center">
+<div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/herder-lockup-dark.svg">
     <img src="assets/herder-lockup-light.svg" height="64" alt="ispx herder">
   </picture>
-</p>
-
-<p align="center">
+  <br><br>
   <a href="https://dsc.gg/ispx"><img src="https://img.shields.io/badge/Discord-join%20the%20ispx%20server-5865F2?logo=discord&logoColor=white" alt="Discord"></a>
-</p>
+</div>
 
 # Herder Community Edition
 
