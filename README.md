@@ -51,11 +51,12 @@ of the documentation lives at [docs.herder.ispx.co](https://docs.herder.ispx.co/
 
 ## What you get
 
-One host, ten containers:
+One host, eleven containers:
 
 | Piece | What it does |
 | --- | --- |
-| herder | The whole ACS in one process: the CWMP and USP adapters, provisioning, telemetry, firmware delivery, experience scores, jobs, webhooks |
+| herder | The ACS in one process: the CWMP and USP adapters, provisioning, telemetry, firmware delivery, experience scores, jobs, webhooks |
+| configservice | Syncs the mapping, telemetry and provisioning YAML the other roles read, from the bundled defaults or a Git repository |
 | herder-api, frontend | The northbound API and the console, behind Caddy |
 | postgres, pgbouncer | Device inventory and state |
 | clickhouse | Telemetry history |

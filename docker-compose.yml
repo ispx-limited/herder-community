@@ -31,7 +31,7 @@ secrets:
 services:
   herder:
     image: ghcr.io/ispx-limited/herder-community:${HERDER_VERSION:?set HERDER_VERSION in .env}
-    command: ["--roles=actions,api,compliance,config,cwmp,devicemanager,enrichment,eventhistory,firmware,geo,jobs,presence,provisioning,scores,sessionhistory,taskworker,telemetry,usp,webhooks"]
+    command: ["--roles=actions,api,compliance,cwmp,devicemanager,enrichment,eventhistory,firmware,geo,jobs,presence,provisioning,scores,sessionhistory,taskworker,telemetry,usp,webhooks"]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     read_only: true
@@ -86,6 +86,41 @@ services:
       timeout: 5s
       retries: 5
       start_period: 90s
+
+  # The config role in its own process. It clones and validates the
+  # operator YAML every other role reads, and a fatal error in a Go
+  # process cannot be caught, so a fault there must not take the
+  # protocol adapters down with it (issue #7). The other roles do not
+  # wait for it: their config stores poll, and see an empty snapshot
+  # until the first sync lands.
+  configservice:
+    image: ghcr.io/ispx-limited/herder-community:${HERDER_VERSION:?}
+    command: ["--roles=config"]
+    restart: unless-stopped
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: [/tmp]
+    environment:
+      LOG_LEVEL: info
+      LOG_FORMAT: json
+      LOG_SERVICE: configservice
+      HEALTH_PORT: "9090"
+      DB_DSN_FILE: /run/secrets/db_dsn
+      NATS_URL: nats://nats:4222
+      NATS_USER: herder
+      NATS_PASSWORD: ${NATS_HERDER_PASSWORD:?}
+      REDIS_ADDRESS: redis:6379
+      ENCRYPTION_KEY_DIR: /etc/herder/keys
+    volumes:
+      - repos:/data/repos
+      - ./keys:/etc/herder/keys:ro
+    secrets: [db_dsn]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9090/readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   # The NATS auth callout is delivered inside the AuthCallout account,
   # so its responder connects as that account's user, in its own
