@@ -117,7 +117,7 @@ if [ ! -f nkeys/authcallout.conf ]; then
 fi
 
 if [ "$(id -u)" = 0 ]; then
-    chown -R 1000:1000 keys secrets nkeys
+    chown -R 1000:1000 keys secrets nkeys config
 fi
 
 docker compose --profile migrate run --rm migrate
