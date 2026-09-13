@@ -34,7 +34,13 @@ set +a
 
 mkdir -p keys secrets config nkeys
 
-# The containers read these as uid 1000.
+# The containers run as uid 1000 and write into these directories, so
+# from a root shell they are handed to that user, the same step every
+# compose file with a non-root image asks for.
+if [ "$(id -u)" = 0 ]; then
+    chown 1000:1000 keys secrets config nkeys
+fi
+
 if [ ! -f keys/default ]; then
     (umask 177 && openssl rand -out keys/default 32)
 fi
@@ -54,14 +60,20 @@ if [ ! -f config/cwmp-factory.yaml ]; then
         "${CWMP_FACTORY_PASSWORD}" > config/cwmp-factory.yaml)
 fi
 
-# The NATS auth-callout key pair for USP. nkeygen ships in the herder
-# image; the seed is read by the auth responder, the conf by NATS.
+# The NATS auth-callout key pair for USP agents, generated once. nkeygen
+# ships in the herder image; the seed is read by the auth responder,
+# the conf by NATS. The user list and the placeholder password are the
+# NATS account wiring the conf file carries; nothing dials out.
 if [ ! -f nkeys/authcallout.conf ]; then
     docker run --rm -v "$(pwd)/nkeys:/nkeys" --entrypoint nkeygen \
         "ghcr.io/ispx-limited/herder-community:${HERDER_VERSION}" \
         --seed=/nkeys/issuer.seed --conf=/nkeys/authcallout.conf \
         --account=AuthCallout --user=authservice,sys,herder,devices \
         --password=unused --enabled=true
+fi
+
+if [ "$(id -u)" = 0 ]; then
+    chown -R 1000:1000 keys secrets nkeys
 fi
 
 docker compose --profile migrate run --rm migrate
