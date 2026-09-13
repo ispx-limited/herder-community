@@ -74,6 +74,28 @@ protocol, and the refusal is logged. The limit is compiled into the
 binaries, not read from configuration. A larger fleet is a licensed
 deployment.
 
+## Licensed edition
+
+The same files run the full product. ispx issues two things for a
+licensed deployment: a registry token, because the licensed images are
+private, and a licence token stating the device cap and the term. In
+`.env` set `HERDER_EDITION=licensed` and `HERDER_REGISTRY_TOKEN` to the
+registry token, save the licence token as `license.txt` next to
+`.env`, and run `./up.sh`. The first administrator is then created with
+
+```sh
+docker compose exec herderapi python -m app.provision --admin
+```
+
+The licence page under Platform shows the term, the fleet against the
+cap and the instance id a renewal is issued against. What the licence
+covers and what happens when it lapses is in the
+[licensing guide](https://docs.herder.ispx.co/guides/licensing/).
+
+A Community Edition install becomes a licensed one the same way, on
+the same data: the fleet, its history and its configuration carry
+over, and only the images change.
+
 ## Upgrading
 
 Set `HERDER_VERSION` in `.env` to the new release and run `./up.sh`

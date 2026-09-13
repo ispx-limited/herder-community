@@ -30,7 +30,7 @@ secrets:
 
 services:
   herder:
-    image: ghcr.io/ispx-limited/herder-community:${HERDER_VERSION:?set HERDER_VERSION in .env}
+    image: ghcr.io/ispx-limited/herder${HERDER_IMAGE_SUFFIX?run ./up.sh, which sets it from HERDER_EDITION}:${HERDER_VERSION:?set HERDER_VERSION in .env}
     command: ["--roles=actions,api,compliance,cwmp,devicemanager,enrichment,eventhistory,firmware,geo,jobs,presence,provisioning,scores,sessionhistory,taskworker,telemetry,usp,webhooks"]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
@@ -97,7 +97,7 @@ services:
   # wait for it: their config stores poll, and see an empty snapshot
   # until the first sync lands.
   configservice:
-    image: ghcr.io/ispx-limited/herder-community:${HERDER_VERSION:?}
+    image: ghcr.io/ispx-limited/herder${HERDER_IMAGE_SUFFIX?}:${HERDER_VERSION:?}
     command: ["--roles=config"]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
@@ -129,7 +129,7 @@ services:
   # so its responder connects as that account's user, in its own
   # container.
   authservice:
-    image: ghcr.io/ispx-limited/herder-community:${HERDER_VERSION:?}
+    image: ghcr.io/ispx-limited/herder${HERDER_IMAGE_SUFFIX?}:${HERDER_VERSION:?}
     command: ["--roles=auth"]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
@@ -155,7 +155,7 @@ services:
     secrets: [db_dsn]
 
   herderapi:
-    image: ghcr.io/ispx-limited/herder-api-community:${HERDER_VERSION:?}
+    image: ghcr.io/ispx-limited/herder-api${HERDER_IMAGE_SUFFIX?}:${HERDER_VERSION:?}
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:
@@ -175,8 +175,12 @@ services:
       ENCRYPTION_KEY_ID: default
       AUTH_ENABLED: "true"
       COOKIE_SECURE: "true"
+      # The licence token, installed on start when newer than the one in
+      # force. Empty in the Community Edition, which takes no licence.
+      LICENSE_FILE: /etc/herder/license.txt
     volumes:
       - ./keys:/etc/herder/keys:ro
+      - ./license.txt:/etc/herder/license.txt:ro
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8000/healthz"]
       interval: 10s
@@ -185,7 +189,7 @@ services:
       start_period: 90s
 
   frontend:
-    image: ghcr.io/ispx-limited/herder-frontend-community:${HERDER_VERSION:?}
+    image: ghcr.io/ispx-limited/herder-frontend${HERDER_IMAGE_SUFFIX?}:${HERDER_VERSION:?}
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     environment:
@@ -223,7 +227,7 @@ services:
   # Targets postgres directly so goose never runs through transaction
   # pooling.
   migrate:
-    image: ghcr.io/ispx-limited/herder-migrate-community:${HERDER_VERSION:?}
+    image: ghcr.io/ispx-limited/herder-migrate${HERDER_IMAGE_SUFFIX?}:${HERDER_VERSION:?}
     profiles: [migrate]
     command: ["-allow-missing", "postgres", "postgres://herder:${POSTGRES_PASSWORD:?}@postgres:5432/herder?sslmode=disable", "up"]
     depends_on:
