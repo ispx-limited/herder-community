@@ -32,6 +32,41 @@ set -a
 . ./.env
 set +a
 
+# The edition picks the images. The suffix is written back into .env so
+# a plain docker compose command sees the same images up.sh does.
+case "${HERDER_EDITION:-community}" in
+    community) HERDER_IMAGE_SUFFIX=-community ;;
+    licensed) HERDER_IMAGE_SUFFIX= ;;
+    *) echo "HERDER_EDITION must be community or licensed" >&2; exit 1 ;;
+esac
+export HERDER_IMAGE_SUFFIX
+if grep -q '^HERDER_IMAGE_SUFFIX=' .env; then
+    sed -i "s/^HERDER_IMAGE_SUFFIX=.*/HERDER_IMAGE_SUFFIX=${HERDER_IMAGE_SUFFIX}/" .env
+else
+    printf 'HERDER_IMAGE_SUFFIX=%s\n' "$HERDER_IMAGE_SUFFIX" >> .env
+fi
+
+# The licence token. The Community Edition takes none and the file
+# stays empty; the licensed edition installs it on start, and until one
+# is in place the console opens on the licence page alone.
+touch license.txt
+if [ "$HERDER_EDITION" = licensed ]; then
+    # The licensed images are private. The token ispx issued is the
+    # registry credential; it lives in .env (mode 600) and nowhere else.
+    if [ -n "${HERDER_REGISTRY_TOKEN:-}" ]; then
+        printf '%s' "$HERDER_REGISTRY_TOKEN" | docker login ghcr.io -u ispx-herder-pull --password-stdin >/dev/null
+    fi
+    if ! docker image inspect "ghcr.io/ispx-limited/herder:${HERDER_VERSION}" >/dev/null 2>&1 \
+        && ! docker manifest inspect "ghcr.io/ispx-limited/herder:${HERDER_VERSION}" >/dev/null 2>&1; then
+        echo "cannot read ghcr.io/ispx-limited/herder:${HERDER_VERSION}: set HERDER_REGISTRY_TOKEN in .env" >&2
+        echo "to the registry credential ispx issued, or docker login ghcr.io -u ispx-herder-pull" >&2
+        exit 1
+    fi
+    if [ ! -s license.txt ]; then
+        echo "license.txt is empty; the console opens on the licence page until a licence is installed."
+    fi
+fi
+
 mkdir -p keys secrets config nkeys
 
 # The containers run as uid 1000 and write into these directories, so
@@ -66,7 +101,7 @@ fi
 # NATS account wiring the conf file carries; nothing dials out.
 if [ ! -f nkeys/authcallout.conf ]; then
     docker run --rm -v "$(pwd)/nkeys:/nkeys" --entrypoint nkeygen \
-        "ghcr.io/ispx-limited/herder-community:${HERDER_VERSION}" \
+        "ghcr.io/ispx-limited/herder${HERDER_IMAGE_SUFFIX}:${HERDER_VERSION}" \
         --seed=/nkeys/issuer.seed --conf=/nkeys/authcallout.conf \
         --account=AuthCallout --user=authservice,sys,herder,devices \
         --password=unused --enabled=true
@@ -78,6 +113,12 @@ fi
 
 docker compose --profile migrate run --rm migrate
 docker compose up -d
+
+if [ "$HERDER_EDITION" = licensed ]; then
+    echo "first administrator: docker compose exec herderapi python -m app.provision --admin"
+else
+    echo "first administrator: docker compose exec herderapi /app/community_entry.bin provision --admin"
+fi
 
 echo
 echo "console:  https://${HERDER_HOSTNAME}$( [ "${HTTPS_PORT}" = 443 ] || printf ':%s' "${HTTPS_PORT}" )"
