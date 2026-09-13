@@ -24,8 +24,9 @@ those images means accepting these terms.
    and versions) that identify no device, subscriber, person or host.
    The documentation lists every field, the software shows each report
    before and after it is sent, and reporting can be switched off at
-   any time in the console or with `USAGE_REPORTING=off`. ISPX LIMITED
-   uses the reports to operate and improve the software.
+   any time in the console or with `USAGE_REPORTING=off`. The reports
+   contain no personal data, are held by ISPX LIMITED in the United
+   Kingdom, and are used to operate and improve the software.
 7. **Termination.** Rights under these terms end if the terms are
    violated. Sections 2 to 4 survive termination.
 
