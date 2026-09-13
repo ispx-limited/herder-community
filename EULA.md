@@ -18,7 +18,15 @@ those images means accepting these terms.
    from its use, to the maximum extent permitted by law.
 5. **No support commitment.** Issues on this repository are read and
    answered on a best effort basis. There is no SLA.
-6. **Termination.** Rights under these terms end if the terms are
+6. **Usage reporting.** The software sends ISPX LIMITED one usage
+   report a day: aggregate counts describing the deployment (devices
+   by vendor, model and firmware, load, configuration counts, sizes
+   and versions) that identify no device, subscriber, person or host.
+   The documentation lists every field, the software shows each report
+   before and after it is sent, and reporting can be switched off at
+   any time in the console or with `USAGE_REPORTING=off`. ISPX LIMITED
+   uses the reports to operate and improve the software.
+7. **Termination.** Rights under these terms end if the terms are
    violated. Sections 2 to 4 survive termination.
 
 The files in this repository itself (compose files, documentation) are
