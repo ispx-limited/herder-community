@@ -23,6 +23,8 @@ if [ ! -f .env ]; then
     echo "wrote .env with generated secrets."
     echo "set ACS_HOST to the address CPEs will dial, review HERDER_HOSTNAME"
     echo "and the ports, then run ./up.sh again."
+    echo "usage reporting to ispx is on (aggregate counts, never a serial or"
+    echo "an address); set USAGE_REPORTING=off in .env to stop it."
     exit 0
 fi
 

@@ -91,6 +91,11 @@ in the [changelog](https://docs.herder.ispx.co/changelog/).
   chown after generation.
 - This is the evaluation shape: one host, no HA, no split stores, no
   inter-host TLS, no backups.
+- The stack sends ispx one usage report a day: aggregate counts by
+  vendor, model and firmware, load and feature use, never a serial
+  number or an address. The licence page shows each report verbatim
+  and has the switch; `USAGE_REPORTING=off` in `.env` does the same.
+  Details in the [Usage Reporting guide](https://docs.herder.ispx.co/guides/usage-reporting/).
 
 ## Getting help
 
