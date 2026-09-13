@@ -32,6 +32,15 @@ set -a
 . ./.env
 set +a
 
+# .env is written once and never touched by git pull, so the release it
+# pins goes stale while .env.example moves on. Say so rather than run
+# an old release in silence; the pin is the operator's to change.
+latest=$(sed -n 's/^HERDER_VERSION=//p' .env.example)
+if [ -n "$latest" ] && [ "$latest" != "${HERDER_VERSION:-}" ]; then
+    echo "note: .env pins HERDER_VERSION=${HERDER_VERSION:-unset}; the current release is ${latest}."
+    echo "      To upgrade, set HERDER_VERSION=${latest} in .env and run ./up.sh again."
+fi
+
 # The edition picks the images. The suffix is written back into .env so
 # a plain docker compose command sees the same images up.sh does.
 case "${HERDER_EDITION:-community}" in
