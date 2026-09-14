@@ -29,6 +29,12 @@ if [ ! -f .env ]; then
     exit 0
 fi
 
+# A release can add a secret the deployment's .env predates; fill it in
+# so the compose file's ${VAR:?} does not stop the upgrade.
+for var in XMPP_ACS_PASSWORD; do
+    grep -q "^${var}=" .env || printf '%s=%s\n' "$var" "$(rand)" >> .env
+done
+
 set -a
 . ./.env
 set +a
