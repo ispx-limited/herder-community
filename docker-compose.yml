@@ -31,7 +31,7 @@ secrets:
 services:
   herder:
     image: ghcr.io/ispx-limited/herder${HERDER_IMAGE_SUFFIX?run ./up.sh, which sets it from HERDER_EDITION}:${HERDER_VERSION:?set HERDER_VERSION in .env}
-    command: ["--roles=actions,api,compliance,cwmp,devicemanager,enrichment,eventhistory,firmware,geo,jobs,presence,provisioning,scores,sessionhistory,taskworker,telemetry,usp,webhooks"]
+    command: ["--roles=actions,api,compliance,cwmp,devicemanager,enrichment,eventhistory,firmware,geo,jobs,presence,provisioning,scores,sessionhistory,taskworker,telemetry,usp,webhooks,xmpp"]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     read_only: true
@@ -44,6 +44,17 @@ services:
       # listeners and must not share a port.
       API_PORT: "8080"
       CWMP_PORT: "7547"
+      # XMPP for TR-069 connection requests to CPEs behind NAT (extenders,
+      # ATAs). The xmpp role serves ACS_HOST as its domain and the task
+      # worker logs into it in-process as the ACS account. Plain text on
+      # the loopback; a CPE on the access network connects on XMPP_PORT.
+      # https://docs.herder.ispx.co/guides/cwmp/#connection-requests
+      XMPP_DOMAINS: ${ACS_HOST:?}
+      XMPP_ACS_PASSWORD: ${XMPP_ACS_PASSWORD:?}
+      XMPP_SERVER: localhost
+      XMPP_JID: acs@${ACS_HOST:?}
+      XMPP_PASSWORD: ${XMPP_ACS_PASSWORD:?}
+      XMPP_TLS_MODE: none
       # The daily usage report to ispx. On by default; USAGE_REPORTING=off
       # in .env stops it. https://docs.herder.ispx.co/guides/usage-reporting/
       USAGE_REPORTING: ${USAGE_REPORTING:-on}
@@ -79,6 +90,7 @@ services:
     secrets: [db_dsn]
     ports:
       - "${CWMP_PORT:-7547}:7547"
+      - "${XMPP_PORT:-5222}:5222"
       - "${FIRMWARE_PORT:-7549}:7549"
       - "127.0.0.1:${HEALTH_PORT:-19090}:9090"
     healthcheck:
