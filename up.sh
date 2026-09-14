@@ -35,9 +35,12 @@ set +a
 # .env is written once and never touched by git pull, so the release it
 # pins goes stale while .env.example moves on. Say so rather than run
 # an old release in silence; the pin is the operator's to change.
+# Only an older pin is worth a word: a newer one is the operator ahead
+# of this checkout, and the pin in .env always wins either way.
 latest=$(sed -n 's/^HERDER_VERSION=//p' .env.example)
-if [ -n "$latest" ] && [ "$latest" != "${HERDER_VERSION:-}" ]; then
-    echo "note: .env pins HERDER_VERSION=${HERDER_VERSION:-unset}; the current release is ${latest}."
+if [ -n "$latest" ] && [ -n "${HERDER_VERSION:-}" ] && [ "$latest" != "$HERDER_VERSION" ] \
+    && [ "$(printf '%s\n%s\n' "$HERDER_VERSION" "$latest" | sort -V | head -n1)" = "$HERDER_VERSION" ]; then
+    echo "note: .env pins HERDER_VERSION=${HERDER_VERSION}; the current release is ${latest}."
     echo "      To upgrade, set HERDER_VERSION=${latest} in .env and run ./up.sh again."
 fi
 
