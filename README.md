@@ -102,6 +102,19 @@ Set `HERDER_VERSION` in `.env` to the new release and run `./up.sh`
 again; migrations run before the new images start. Releases are listed
 in the [changelog](https://docs.herder.ispx.co/changelog/).
 
+## Streams in memory
+
+The NATS streams Herder drains into Postgres and ClickHouse (TELEMETRY,
+SESSION and DEVICE) are held in memory rather than written to disk a
+second time. A fresh install creates them that way. An install from
+before this setting keeps its streams on disk, and a message in flight
+is all that moving them costs:
+
+```sh
+docker compose run --rm --no-deps --entrypoint /usr/local/bin/herder \
+  herder --apply-streams --allow-stream-recreate
+```
+
 ## Good to know
 
 - The containers run as uid 1000 and own the generated `keys/`,
@@ -117,6 +130,9 @@ in the [changelog](https://docs.herder.ispx.co/changelog/).
   chown after generation.
 - This is the evaluation shape: one host, no HA, no split stores, no
   inter-host TLS, no backups.
+- Postgres is set for a 4 GB host. On a larger one, set
+  `POSTGRES_SHARED_BUFFERS` to a quarter of the RAM and
+  `POSTGRES_EFFECTIVE_CACHE_SIZE` to about two thirds in `.env`.
 - The stack sends ispx one usage report a day: aggregate counts by
   vendor, model and firmware, load and feature use, never a serial
   number or an address. The licence page shows each report verbatim

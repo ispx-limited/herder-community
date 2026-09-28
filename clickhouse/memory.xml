@@ -1,0 +1,9 @@
+<!--
+  ClickHouse shares this host with Postgres, NATS and Herder, so it is
+  held to three tenths of the RAM and a modest mark cache rather than
+  the defaults, which assume a dedicated server.
+-->
+<clickhouse>
+    <max_server_memory_usage_to_ram_ratio>0.3</max_server_memory_usage_to_ram_ratio>
+    <mark_cache_size>268435456</mark_cache_size>
+</clickhouse>

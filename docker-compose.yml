@@ -60,6 +60,11 @@ services:
       USAGE_REPORTING: ${USAGE_REPORTING:-on}
       DB_DSN_FILE: /run/secrets/db_dsn
       NATS_URL: nats://nats:4222
+      # The streams Herder drains into Postgres and ClickHouse are held
+      # in memory rather than written to disk a second time. A fresh
+      # install creates them that way; an existing one keeps what it has
+      # until they are moved (README, "Streams in memory").
+      NATS_MEMORY_STREAMS: TELEMETRY,SESSION,DEVICE
       NATS_USER: herder
       NATS_PASSWORD: ${NATS_HERDER_PASSWORD:?}
       REDIS_ADDRESS: redis:6379
@@ -122,6 +127,11 @@ services:
       HEALTH_PORT: "9090"
       DB_DSN_FILE: /run/secrets/db_dsn
       NATS_URL: nats://nats:4222
+      # The streams Herder drains into Postgres and ClickHouse are held
+      # in memory rather than written to disk a second time. A fresh
+      # install creates them that way; an existing one keeps what it has
+      # until they are moved (README, "Streams in memory").
+      NATS_MEMORY_STREAMS: TELEMETRY,SESSION,DEVICE
       NATS_USER: herder
       NATS_PASSWORD: ${NATS_HERDER_PASSWORD:?}
       REDIS_ADDRESS: redis:6379
@@ -181,6 +191,11 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:?}
       REDIS_URL: redis://redis:6379/0
       NATS_URL: nats://nats:4222
+      # The streams Herder drains into Postgres and ClickHouse are held
+      # in memory rather than written to disk a second time. A fresh
+      # install creates them that way; an existing one keeps what it has
+      # until they are moved (README, "Streams in memory").
+      NATS_MEMORY_STREAMS: TELEMETRY,SESSION,DEVICE
       NATS_USER: herder
       NATS_PASSWORD: ${NATS_HERDER_PASSWORD:?}
       ENCRYPTION_KEY_DIR: /etc/herder/keys
@@ -254,6 +269,25 @@ services:
       POSTGRES_USER: herder
       POSTGRES_DB: herder
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+    # Postgres's defaults assume a machine a tenth this size and a
+    # checkpoint every five minutes, which rewrites the same busy pages
+    # over and over. A quarter of the host's RAM is the usual starting
+    # point for shared_buffers: set POSTGRES_SHARED_BUFFERS and
+    # POSTGRES_EFFECTIVE_CACHE_SIZE in .env on a host larger than 4 GB.
+    command:
+      - postgres
+      - -c
+      - shared_buffers=${POSTGRES_SHARED_BUFFERS:-1GB}
+      - -c
+      - effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE:-2GB}
+      - -c
+      - checkpoint_timeout=30min
+      - -c
+      - checkpoint_completion_target=0.9
+      - -c
+      - max_wal_size=4GB
+      - -c
+      - wal_compression=on
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -291,6 +325,8 @@ services:
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
+      - ./clickhouse/logs.xml:/etc/clickhouse-server/config.d/logs.xml:ro
+      - ./clickhouse/memory.xml:/etc/clickhouse-server/config.d/memory.xml:ro
     ulimits:
       nofile:
         soft: 262144
