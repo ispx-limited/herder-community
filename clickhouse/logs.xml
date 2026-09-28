@@ -1,0 +1,35 @@
+<!--
+  What ClickHouse writes about itself. Its defaults keep more than a dozen
+  system log tables, several written every second whatever the fleet
+  does; on a small host their parts and merges outweigh the telemetry
+  they sit beside. Nothing in Herder reads them. The query log and the
+  part log stay, for a week, for diagnosing the server.
+-->
+<clickhouse>
+    <asynchronous_metric_log remove="1"/>
+    <metric_log remove="1"/>
+    <text_log remove="1"/>
+    <trace_log remove="1"/>
+    <processors_profile_log remove="1"/>
+    <query_thread_log remove="1"/>
+    <query_views_log remove="1"/>
+    <opentelemetry_span_log remove="1"/>
+    <asynchronous_insert_log remove="1"/>
+    <error_log remove="1"/>
+    <session_log remove="1"/>
+    <backup_log remove="1"/>
+    <blob_storage_log remove="1"/>
+    <zookeeper_log remove="1"/>
+    <query_log>
+        <database>system</database>
+        <table>query_log</table>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+        <flush_interval_milliseconds>30000</flush_interval_milliseconds>
+    </query_log>
+    <part_log>
+        <database>system</database>
+        <table>part_log</table>
+        <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+        <flush_interval_milliseconds>30000</flush_interval_milliseconds>
+    </part_log>
+</clickhouse>
