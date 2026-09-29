@@ -15,6 +15,16 @@
 
 {$HERDER_HOSTNAME:localhost} {
 	tls internal
+	# Framing is limited to this origin rather than refused, because the
+	# console embeds the API's own docs page. No HSTS: with Caddy's own
+	# CA the browser has to be allowed to accept the certificate.
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Content-Security-Policy "frame-ancestors 'self'"
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
 	handle /healthz {
 		respond "ok" 200
 	}
