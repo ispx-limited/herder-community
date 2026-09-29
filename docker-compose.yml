@@ -58,6 +58,14 @@ services:
       # The daily usage report to ispx. On by default; USAGE_REPORTING=off
       # in .env stops it. https://docs.herder.ispx.co/guides/usage-reporting/
       USAGE_REPORTING: ${USAGE_REPORTING:-on}
+      # Where CPEs are told to run TR-143 and TR-471 throughput tests: a
+      # diagd instance (github.com/ispx-limited/diagd).
+      # Left empty, only profiles that name their own test_server can run
+      # a speedtest, and Herder says so at start. The probe URL is read by
+      # Herder itself, so it may be an address the container reaches
+      # rather than the public name.
+      DIAGNOSTICS_TEST_SERVER: ${DIAGNOSTICS_TEST_SERVER:-}
+      DIAGNOSTICS_PROBE_SERVER: ${DIAGNOSTICS_PROBE_SERVER:-}
       DB_DSN_FILE: /run/secrets/db_dsn
       NATS_URL: nats://nats:4222
       # The streams Herder drains into Postgres and ClickHouse are held
