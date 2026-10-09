@@ -121,7 +121,7 @@ docker compose run --rm --no-deps --entrypoint /usr/local/bin/herder \
   `secrets/` and `nkeys/`. `up.sh` hands them over when run as root; from
   another account, `sudo chown -R 1000:1000 keys secrets nkeys` does the
   same.
-- The published ports (80, 443, 7547, 7549, 1883) bind on all
+- The published ports (80, 443, 7547, 7549, 1883, 5222, 3478/udp) bind on all
   interfaces. A lab host belongs behind a firewall you trust.
 - `keys/default` seals every credential Herder stores. Back it up
   with the database; losing it orphans them.

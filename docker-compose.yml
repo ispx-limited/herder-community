@@ -31,7 +31,7 @@ secrets:
 services:
   herder:
     image: ghcr.io/ispx-limited/herder${HERDER_IMAGE_SUFFIX?run ./up.sh, which sets it from HERDER_EDITION}:${HERDER_VERSION:?set HERDER_VERSION in .env}
-    command: ["--roles=actions,api,compliance,cwmp,devicemanager,enrichment,eventhistory,firmware,geo,jobs,presence,provisioning,scores,sessionhistory,taskworker,telemetry,usp,webhooks,xmpp"]
+    command: ["--roles=actions,api,compliance,cwmp,devicemanager,enrichment,eventhistory,firmware,geo,jobs,presence,provisioning,scores,sessionhistory,stun,taskworker,telemetry,usp,webhooks,xmpp"]
     restart: unless-stopped
     security_opt: [no-new-privileges:true]
     read_only: true
@@ -55,6 +55,12 @@ services:
       XMPP_JID: acs@${ACS_HOST:?}
       XMPP_PASSWORD: ${XMPP_ACS_PASSWORD:?}
       XMPP_TLS_MODE: none
+      # STUN for TR-069 connection requests to a CPE behind NAT without
+      # XMPP (TR-069 Annex G). The stun role answers the CPE's keepalives
+      # on STUN_PORT and sends the UDP connection request from the same
+      # socket. Off on every device until a provisioning rule writes
+      # STUNEnable. https://docs.herder.ispx.co/guides/cwmp/#the-stun-role
+      STUN_LISTEN: ":3478"
       # The daily usage report to ispx. On by default; USAGE_REPORTING=off
       # in .env stops it. https://docs.herder.ispx.co/guides/usage-reporting/
       USAGE_REPORTING: ${USAGE_REPORTING:-on}
@@ -104,6 +110,7 @@ services:
     ports:
       - "${CWMP_PORT:-7547}:7547"
       - "${XMPP_PORT:-5222}:5222"
+      - "${STUN_PORT:-3478}:3478/udp"
       - "${FIRMWARE_PORT:-7549}:7549"
       - "127.0.0.1:${HEALTH_PORT:-19090}:9090"
     healthcheck:
