@@ -138,6 +138,10 @@ docker compose run --rm --no-deps --entrypoint /usr/local/bin/herder \
   number or an address. The licence page shows each report verbatim
   and has the switch; `USAGE_REPORTING=off` in `.env` does the same.
   Details in the [Usage Reporting guide](https://docs.herder.ispx.co/guides/usage-reporting/).
+- The experience rollups (scores, WiFi sessions, WiFi issues) are on by
+  default; `SCORES_ENABLED=false` in `.env` turns them off and the
+  [Experience Scores guide](https://docs.herder.ispx.co/guides/experience-scores/)
+  says when that is the right call.
 
 ## Getting help
 
